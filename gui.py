@@ -7,23 +7,29 @@ class GUI:
         self.master = master
         master.title("PyCal v1.0")
 
-        self.label = Label(master, text="PyCal v1.0")
-        self.label.pack()
+        # Setting up the main root frames
+        self.top_frame = Frame(master)
+        self.top_frame.pack()
+        self.bottom_frame = Frame(master)
+        self.bottom_frame.pack(side=BOTTOM)
 
-        self.greet_button = Button(master, text="List Resources", command=self.list_resources)
-        self.greet_button.pack()
+        self.list_resources_button = Button(self.top_frame, text="List Resources", command=self.list_resources)
+        self.list_resources_button.pack()
 
-        self.close_button = Button(master, text="Close", command=master.quit)
+        self.close_button = Button(self.bottom_frame, text="Close", command=master.quit)
         self.close_button.pack()
 
     """
-    Prints a list of available instruments
+    Prints a list of available instruments to a new window
     """
     def list_resources(self):
-        print(visacommands.list_resources())
+        nw = Tk()
+        nw.title = "Resources"
+        resources = Label(nw, text=visacommands.list_resources())
+        resources.pack()
 
 
-# Runs the tkinter display
+# Runs the main root display
 root = Tk()
 pycal_gui = GUI(root)
 root.mainloop()
