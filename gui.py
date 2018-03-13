@@ -1,37 +1,29 @@
 from tkinter import *
 import visacommands
 
-root = Tk()
-menubar = Menu(root)
-
 
 class GUI:
     def __init__(self, master):
         self.master = master
         master.title("PyCal v1.0")
 
-        self.label = Label(master, text="Big text")
+        self.label = Label(master, text="PyCal v1.0")
         self.label.pack()
 
-        self.greet_button = Button(master, text="Identify unit", command=self.greet)
+        self.greet_button = Button(master, text="List Resources", command=self.list_resources)
         self.greet_button.pack()
-
-        self.address_menu = Menu(menubar, tearoff=0)
-        self.address_menu.add_command(label="Create script", command=self.menuButton)
 
         self.close_button = Button(master, text="Close", command=master.quit)
         self.close_button.pack()
 
-    def greet(self):
-        print(visacommands.command)
-
-    def menuButton(self):
-        filewin = Toplevel(root)
-        button = Button(filewin, text="Place Holder")
-        button.pack()
+    """
+    Prints a list of available instruments
+    """
+    def list_resources(self):
+        print(visacommands.list_resources())
 
 
-root.config(menu=menubar)
-
+# Runs the tkinter display
+root = Tk()
 pycal_gui = GUI(root)
 root.mainloop()
