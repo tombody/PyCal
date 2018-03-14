@@ -2,7 +2,12 @@ from tkinter import *
 import tkinter.messagebox
 import visacommands
 
+# Global variables
 version_number = "PyCal v1.0"
+selected_port_from_list = ""
+selected_address_from_list = ""
+select_instrument_from_list = ""
+connected_instrument = ""
 
 
 class GUI:
@@ -33,7 +38,7 @@ class GUI:
         self.help_submenu.add_command(label="About", command=self.get_version_number)
 
         # Select Instrument
-        self.available_instruments = ["3478A",]
+        self.available_instruments = ["3478A", ]
         self.instruments = StringVar(master)
         self.instruments.set("Select Instrument")
         self.instruments = OptionMenu(master, self.instruments, self.available_instruments,
@@ -45,7 +50,7 @@ class GUI:
         self.GPIB_ports = StringVar(master)
         self.GPIB_ports.set("GPIB Port")
         self.gpib_ports = OptionMenu(master, self.GPIB_ports, *self.available_ports,
-                                       command=self.selected_port)
+                                     command=self.selected_port)
         self.gpib_ports.grid(column=1, row=0, padx=5, pady=5, sticky=W)
 
         # Select GPIB address
@@ -54,7 +59,7 @@ class GUI:
         self.GPIB_addresses.set("GPIB Address")
         self.gpib_address = OptionMenu(master, self.GPIB_addresses, *self.available_addresses,
                                        command=self.selected_address)
-        self.gpib_address.grid(column=2, row=0, padx=5, pady=5,  sticky=W)
+        self.gpib_address.grid(column=2, row=0, padx=5, pady=5, sticky=W)
 
         # Lists resources
         self.list_resources_button = Button(master, text="List Resources", command=self.list_resources)
@@ -64,29 +69,41 @@ class GUI:
         self.connect_button = Button(master, text="Connect", command=self.connect)
         self.connect_button.grid(column=4, row=0, padx=5, pady=5, sticky=W)
 
-
     """
     Prints a list of available instruments to a new window
     """
-    def list_resources(self):
+
+    @staticmethod
+    def list_resources():
         tkinter.messagebox.showinfo("Resource List", '\n'.join(visacommands.list_resources()))
 
-    def get_version_number(self):
-        tkinter.messagebox._show("About", version_number)
+    @staticmethod
+    def get_version_number():
+        tkinter.messagebox.showinfo("About", version_number)
 
-    def selected_address(self, value):
+    @staticmethod
+    def selected_address(value):
+        global selected_address_from_list
+        selected_address_from_list = value
         return value
 
-    def selected_port(self, value):
+    @staticmethod
+    def selected_port(value):
+        global selected_port_from_list
+        selected_port_from_list = value
         return value
 
-    def selected_instrument(self, value):
+    @staticmethod
+    def selected_instrument(value):
+        global selected_instrument_from_list
+        selected_instrument_from_list = value
         return value
 
-    def connect(self):
-        # Use to open window to control instrument
-        pass
-
+    @staticmethod
+    def connect():
+        global connected_instrument
+        connected_instrument = f"GPIB{selected_port_from_list}::{selected_address_from_list}::INSTR"
+        visacommands.open_instrument(connected_instrument)
 
 
 # Runs the main root display
