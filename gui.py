@@ -102,7 +102,8 @@ class GUI:
     @staticmethod
     def connect():
         global connected_instrument
-        connected_instrument = f"GPIB{selected_port_from_list}::{selected_address_from_list}::INSTR"
+        # connected_instrument = f"GPIB{selected_port_from_list}::{selected_address_from_list}::INSTR" # works with 3.6
+        connected_instrument = "GPIB{0}::{1}::INSTR".format(selected_port_from_list, selected_address_from_list)
         visacommands.open_instrument(connected_instrument)
 
 
