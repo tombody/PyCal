@@ -1,12 +1,13 @@
 from tkinter import *
 import tkinter.messagebox
 import visacommands
+import os
 
 # Global variables
 version_number = "PyCal v1.0"
 selected_port_from_list = ""
 selected_address_from_list = ""
-select_instrument_from_list = ""
+selected_instrument_from_list = ""
 connected_instrument = ""
 
 
@@ -66,12 +67,19 @@ class GUI:
         self.list_resources_button.grid(column=0, row=0, padx=5, pady=5, sticky=W)
 
         # Connects instrument to instrument
-        self.connect_button = Button(master, text="Connect", command=lambda: [self.connect(),
-                                                                              self.create_window()])
+        self.connect_button = Button(master, text="Connect", command=lambda: [self.connect(), self.create_window()])
         self.connect_button.grid(column=4, row=0, padx=5, pady=5, sticky=W)
 
+
     def create_window(self):
-        print("sure")
+        """
+        Opens a new window that controls the selected item
+        """
+        global selected_instrument_from_list
+        os.system("Unit3478A.py")
+
+        window = tkinter.Toplevel(root)
+        window.title(selected_instrument_from_list)
 
     @staticmethod
     def list_resources():
@@ -80,12 +88,15 @@ class GUI:
         """
         instrument_dict = visacommands.unit_identifiers(visacommands.list_resources())
         instrument_list = ""
-        for k,v in instrument_dict.items():
+        for k, v in instrument_dict.items():
             instrument_list += str(k + " --- " + v + '\n')
         tkinter.messagebox.showinfo("Resource List", instrument_list)
 
     @staticmethod
     def get_version_number():
+        """
+        Gets current version
+        """
         tkinter.messagebox.showinfo("About", version_number)
 
     @staticmethod
@@ -109,12 +120,13 @@ class GUI:
     @staticmethod
     def connect():
         global connected_instrument
-        # connected_instrument = f"GPIB{selected_port_from_list}::{selected_address_from_list}::INSTR" # works with 3.6
-        connected_instrument = "GPIB{0}::{1}::INSTR".format(selected_port_from_list, selected_address_from_list)
+        connected_instrument = f"GPIB{selected_port_from_list}::{selected_address_from_list}::INSTR"
+        # connected_instrument = "GPIB{0}::{1}::INSTR".format(selected_port_from_list, selected_address_from_list)
         visacommands.open_instrument(connected_instrument)
 
 
 # Runs the main root display
-root = Tk()
-pycal_gui = GUI(root)
-root.mainloop()
+if __name__ == "__main__":
+    root = Tk()
+    pycal_gui = GUI(root)
+    root.mainloop()
