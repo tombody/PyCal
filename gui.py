@@ -38,10 +38,10 @@ class GUI:
         self.help_submenu.add_command(label="About", command=self.get_version_number)
 
         # Select Instrument
-        self.available_instruments = ["3478A", ]
+        self.available_instruments = visacommands.available_instruments
         self.instruments = StringVar(master)
         self.instruments.set("Select Instrument")
-        self.instruments = OptionMenu(master, self.instruments, self.available_instruments,
+        self.instruments = OptionMenu(master, self.instruments, *self.available_instruments,
                                       command=self.selected_instrument)
         self.instruments.grid(column=3, row=0, padx=5, pady=5, sticky=W)
 
@@ -66,16 +66,23 @@ class GUI:
         self.list_resources_button.grid(column=0, row=0, padx=5, pady=5, sticky=W)
 
         # Connects instrument to instrument
-        self.connect_button = Button(master, text="Connect", command=self.connect)
+        self.connect_button = Button(master, text="Connect", command=lambda: [self.connect(),
+                                                                              self.create_window()])
         self.connect_button.grid(column=4, row=0, padx=5, pady=5, sticky=W)
 
-    """
-    Prints a list of available instruments to a new window
-    """
+    def create_window(self):
+        print("sure")
 
     @staticmethod
     def list_resources():
-        tkinter.messagebox.showinfo("Resource List", '\n'.join(visacommands.list_resources()))
+        """
+        Prints a list of available instruments to a new window
+        """
+        instrument_dict = visacommands.unit_identifiers(visacommands.list_resources())
+        instrument_list = ""
+        for k,v in instrument_dict.items():
+            instrument_list += str(k + " --- " + v + '\n')
+        tkinter.messagebox.showinfo("Resource List", instrument_list)
 
     @staticmethod
     def get_version_number():
