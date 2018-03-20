@@ -1,21 +1,20 @@
 from tkinter import *
 import tkinter.messagebox
 import visacommands
-import os
 
 # Global variables
-version_number = "PyCal v1.0"
-selected_port_from_list = ""
-selected_address_from_list = ""
-selected_instrument_from_list = ""
-connected_instrument = ""
+VERSION_NUMBER = "PyCal v1.0"
+SELECTED_PORT_FROM_LIST = ""
+SELECTED_ADDRESS_FROM_LIST = ""
+SELECTED_INSTRUMENT_FROM_LIST = ""
+CONNECTED_INSTRUMENT = ""
 
 
-class GUI:
+class PyCal:
     def __init__(self, master):
         # Sets root title and min window size
         self.master = master
-        master.title(version_number)
+        master.title(VERSION_NUMBER)
         master.minsize(width=500, height=40)
 
         # Creates menu
@@ -39,7 +38,7 @@ class GUI:
         self.help_submenu.add_command(label="About", command=self.get_version_number)
 
         # Select Instrument
-        self.available_instruments = visacommands.available_instruments
+        self.available_instruments = visacommands.AVAILABLE_INSTRUMENTS
         self.instruments = StringVar(master)
         self.instruments.set("Select Instrument")
         self.instruments = OptionMenu(master, self.instruments, *self.available_instruments,
@@ -70,16 +69,20 @@ class GUI:
         self.connect_button = Button(master, text="Connect", command=lambda: [self.connect(), self.create_window()])
         self.connect_button.grid(column=4, row=0, padx=5, pady=5, sticky=W)
 
-
     def create_window(self):
         """
-        Opens a new window that controls the selected item
+        Opens a new window that controls the selected instrument by opening its class
         """
-        global selected_instrument_from_list
-        os.system("Unit3478A.py")
+        global SELECTED_INSTRUMENT_FROM_LIST
+        self.new_window = Toplevel(self.master)
 
-        window = tkinter.Toplevel(root)
-        window.title(selected_instrument_from_list)
+        # Runs the selected class. Insert new instruments here.
+        if SELECTED_INSTRUMENT_FROM_LIST == "3478A":
+            self.app = NotAvailable(self.new_window)
+        elif SELECTED_INSTRUMENT_FROM_LIST == "34401A":
+            self.app = Unit_34401A(self.new_window)
+        elif SELECTED_INSTRUMENT_FROM_LIST == "5520A":
+            self.app = NotAvailable(self.new_window)
 
     @staticmethod
     def list_resources():
@@ -97,36 +100,59 @@ class GUI:
         """
         Gets current version
         """
-        tkinter.messagebox.showinfo("About", version_number)
+        tkinter.messagebox.showinfo("About", VERSION_NUMBER)
 
     @staticmethod
     def selected_address(value):
-        global selected_address_from_list
-        selected_address_from_list = value
+        global SELECTED_ADDRESS_FROM_LIST
+        SELECTED_ADDRESS_FROM_LIST = value
         return value
 
     @staticmethod
     def selected_port(value):
-        global selected_port_from_list
-        selected_port_from_list = value
+        global SELECTED_PORT_FROM_LIST
+        SELECTED_PORT_FROM_LIST = value
         return value
 
     @staticmethod
     def selected_instrument(value):
-        global selected_instrument_from_list
-        selected_instrument_from_list = value
+        global SELECTED_INSTRUMENT_FROM_LIST
+        SELECTED_INSTRUMENT_FROM_LIST = value
         return value
 
     @staticmethod
     def connect():
-        global connected_instrument
-        connected_instrument = f"GPIB{selected_port_from_list}::{selected_address_from_list}::INSTR"
+        global CONNECTED_INSTRUMENT
+        CONNECTED_INSTRUMENT = f"GPIB{SELECTED_PORT_FROM_LIST}::{SELECTED_ADDRESS_FROM_LIST}::INSTR"
         # connected_instrument = "GPIB{0}::{1}::INSTR".format(selected_port_from_list, selected_address_from_list)
-        visacommands.open_instrument(connected_instrument)
+        visacommands.open_instrument(CONNECTED_INSTRUMENT)
 
+# Instrument Classes
+
+class NotAvailable(Toplevel):
+    def __init__(self, master):
+        self.master = master
+        label = Label(master, text="Not yet available")
+        label.pack()
+
+class Unit_34401A(Toplevel):
+    def __init__(self, master):
+        self.master = master
+        master.title(SELECTED_INSTRUMENT_FROM_LIST)
+
+        # 34401A Functions list
+        self.functions = [("DC-V",1),("AC-V",2),
+                          ("Ω-2W",3),("Ω-4W",4),
+                          ("Freq",5),("Period",6),
+                          ("Cont",7),("Diode",8)]
+        v = IntVar()
+        for val, func in enumerate(self.functions):
+            options = Radiobutton(master, text=func, width=15,
+                                  variable=v, value=val, indicatoron=0)
+            options.grid(row=0, column=val)
 
 # Runs the main root display
 if __name__ == "__main__":
     root = Tk()
-    pycal_gui = GUI(root)
+    pycal = PyCal(root)
     root.mainloop()

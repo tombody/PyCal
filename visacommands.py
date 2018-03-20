@@ -1,26 +1,31 @@
 import visa
 
-available_instruments = ["3478A", "34401A", "5520A"]
 rm = visa.ResourceManager()
 
+#Global variables
+AVAILABLE_INSTRUMENTS = ["3478A", "34401A", "5520A"]
 
 
 def open_instrument(code):
+    """
+    Opens the selected instrument
+    :param code:
+    """
     current_instrument = rm.open_resource(code)
 
 
-def unit_identifier():
-    return None
-
-
 def list_resources():
+    """
+    returns a list of resources using the NI backend
+    :return:
+    """
     return rm.list_resources()
 
 
 def unit_identifiers(units):
     """
     Creates a dict of all available resources
-    :arg: units -- rm.list_resources()
+    :param units: rm.list_resources()
     :returns: dict
     """
     identities = {}
@@ -32,4 +37,7 @@ def unit_identifiers(units):
             identities[unit] = identity
     return identities
 
+
+def set():
+    pass
 
