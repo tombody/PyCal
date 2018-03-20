@@ -16,8 +16,7 @@ def open_instrument(code):
 
 def list_resources():
     """
-    returns a list of resources using the NI backend
-    :return:
+    :return a list of resources using the NI backend
     """
     return rm.list_resources()
 

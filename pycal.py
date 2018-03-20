@@ -80,7 +80,7 @@ class PyCal:
         if SELECTED_INSTRUMENT_FROM_LIST == "3478A":
             self.app = NotAvailable(self.new_window)
         elif SELECTED_INSTRUMENT_FROM_LIST == "34401A":
-            self.app = Unit_34401A(self.new_window)
+            self.app = Unit34401A(self.new_window)
         elif SELECTED_INSTRUMENT_FROM_LIST == "5520A":
             self.app = NotAvailable(self.new_window)
 
@@ -129,27 +129,75 @@ class PyCal:
 
 # Instrument Classes
 
+
 class NotAvailable(Toplevel):
     def __init__(self, master):
         self.master = master
         label = Label(master, text="Not yet available")
         label.pack()
 
-class Unit_34401A(Toplevel):
+
+class Unit34401A(Toplevel):
     def __init__(self, master):
         self.master = master
         master.title(SELECTED_INSTRUMENT_FROM_LIST)
 
         # 34401A Functions list
-        self.functions = [("DC-V",1),("AC-V",2),
-                          ("Ω-2W",3),("Ω-4W",4),
-                          ("Freq",5),("Period",6),
-                          ("Cont",7),("Diode",8)]
-        v = IntVar()
-        for val, func in enumerate(self.functions):
+        self.function_names = ["DC-Volts", "AC-Volts", "Resist-2Wire",
+                               "Resist-4Wire", "Freq", "Period", "Cont", "Diode"]
+        self.function_defs = [self.dcvolts, self.acvolts, self.twowire, self.fourwire,
+                              self.freq, self.period, self.cont, self.diode]
+        self.function_dict = dict(zip(self.function_names, self.function_defs))
+
+        # Code for selecting the 34401A functions from the radio buttons
+        self.selected_function = StringVar()
+        val = 0
+        for func in self.function_names:
             options = Radiobutton(master, text=func, width=15,
-                                  variable=v, value=val, indicatoron=0)
+                                  variable=self.selected_function, value=func,
+                                  indicatoron=0, command=self.selector)
             options.grid(row=0, column=val)
+            val += 1
+
+        # Temp test button
+        button = Button(master, text="test", command=lambda: print(self.function_dict))
+        button.grid(row=2)
+
+    # Opens up selected function pane
+    def selector(self):
+        """
+        Calls selected function
+        """
+        if self.selected_function.get() in self.function_names:
+            self.function_dict[self.selected_function.get()]()
+
+    # 34401A function definitions
+    def dcvolts(self):
+        print("dc")
+        pass
+
+    def acvolts(self):
+        print("ac")
+        pass
+
+    def twowire(self):
+        pass
+
+    def fourwire(self):
+        pass
+
+    def freq(self):
+        pass
+
+    def period(self):
+        pass
+
+    def cont(self):
+        pass
+
+    def diode(self):
+        pass
+
 
 # Runs the main root display
 if __name__ == "__main__":
