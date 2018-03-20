@@ -1,8 +1,8 @@
 from tkinter import *
 import tkinter.messagebox
-import gui
+import pycal
 
-gui.Toplevel()
+pycal.Toplevel()
 
 class Unit3478A():
     def __init__(self, master):
