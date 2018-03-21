@@ -151,17 +151,29 @@ class Unit34401A(Toplevel):
 
         # Code for selecting the 34401A functions from the radio buttons
         self.selected_function = StringVar()
-        val = 0
+        col = 0
+        row = 0
         for func in self.function_names:
+            if col <= 3:
+                row = 0
+            else:
+                row = 1
             options = Radiobutton(master, text=func, width=15,
                                   variable=self.selected_function, value=func,
                                   indicatoron=0, command=self.selector)
-            options.grid(row=0, column=val)
-            val += 1
+            options.grid(row=row, column=col%4)
+            col += 1
+
+        # Code for screen display
+        display_variable = StringVar()
+        display = Label(master, text="placer", font=("Arial", 24), compound=RIGHT,
+                        relief="ridge", anchor=E)
+        display.grid(row=3, column=1, columnspan=2, pady=20,
+                     ipadx=5, ipady=5, sticky="WE")
 
         # Temp test button
-        button = Button(master, text="test", command=lambda: print(self.function_dict))
-        button.grid(row=2)
+        # button = Button(master, text="test", command=lambda: print(self.function_dict))
+        # button.grid(row=2)
 
     # Opens up selected function pane
     def selector(self):
@@ -173,12 +185,14 @@ class Unit34401A(Toplevel):
 
     # 34401A function definitions
     def dcvolts(self):
-        print("dc")
-        pass
+        command="MEAS:VOLT:DC? 10, 0.001"
+        value = visacommands.query(CONNECTED_INSTRUMENT, command)
+        print(value)
 
     def acvolts(self):
-        print("ac")
-        pass
+        command = "MEAS:VOLT:AC? 10, 0.001"
+        value = visacommands.query(CONNECTED_INSTRUMENT, command)
+        print(value)
 
     def twowire(self):
         pass
@@ -193,10 +207,14 @@ class Unit34401A(Toplevel):
         pass
 
     def cont(self):
-        pass
+        command = "MEAS:CONT?"
+        value = visacommands.query(CONNECTED_INSTRUMENT, command)
+        print(value)
 
     def diode(self):
-        pass
+        command = "MEAS:DIOD?"
+        value = visacommands.query(CONNECTED_INSTRUMENT, command)
+        print(value)
 
 
 # Runs the main root display
