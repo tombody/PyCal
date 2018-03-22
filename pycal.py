@@ -142,79 +142,104 @@ class Unit34401A(Toplevel):
         self.master = master
         master.title(SELECTED_INSTRUMENT_FROM_LIST)
 
+        # Variable to ensure this window is always connected to this instrument
+        self.connect_instrument = CONNECTED_INSTRUMENT
+
         # 34401A Functions list
-        self.function_names = ["DC-Volts", "AC-Volts", "Resist-2Wire",
-                               "Resist-4Wire", "Freq", "Period", "Cont", "Diode"]
-        self.function_defs = [self.dcvolts, self.acvolts, self.twowire, self.fourwire,
-                              self.freq, self.period, self.cont, self.diode]
+        self.function_names = ["DC-Volts", "AC-Volts", "DC-Current", "AC-Current", "Continuity",
+                               "Resistance-2Wire", "Resistance-4Wire", "Freq", "Period", "Diode"]
+        self.function_defs = [self.dcvolts, self.acvolts, self.dccurr, self.accurr, self.continuity,
+                              self.twowire, self.fourwire, self.freq, self.period, self.diode]
         self.function_dict = dict(zip(self.function_names, self.function_defs))
 
         # Code for selecting the 34401A functions from the radio buttons
         self.selected_function = StringVar()
         col = 0
-        row = 0
         for func in self.function_names:
-            if col <= 3:
+            if col <= 4:
                 row = 0
-            else:
+            elif col <= 9:
                 row = 1
+            else:
+                row = 2
             options = Radiobutton(master, text=func, width=15,
                                   variable=self.selected_function, value=func,
-                                  indicatoron=0, command=self.selector)
-            options.grid(row=row, column=col%4)
+                                  indicatoron=0, command=self.selector_34401A_function)
+            options.grid(row=row, column=col%5)
             col += 1
 
-        # Code for screen display
-        display_variable = StringVar()
-        display = Label(master, text="placer", font=("Arial", 24), compound=RIGHT,
-                        relief="ridge", anchor=E)
-        display.grid(row=3, column=1, columnspan=2, pady=20,
-                     ipadx=5, ipady=5, sticky="WE")
+        # The variable that gets displayed on screen
+        self.display_value = StringVar()
+        self.display_value.set("")
 
-        # Temp test button
-        # button = Button(master, text="test", command=lambda: print(self.function_dict))
-        # button.grid(row=2)
+        #Variables for range and resolution
+        self.range = "MAX"
+        self.resolution = "MAX"
+
+        # Code for screen display
+        display = Label(master, textvariable=self.display_value, font=("Arial", 24), compound=RIGHT,
+                        relief="ridge", anchor=E, height=2)
+        display.grid(row=3, column=1, columnspan=3,
+                     ipadx=5, ipady=3, sticky="EW")
 
     # Opens up selected function pane
-    def selector(self):
+    def selector_34401A_function(self):
         """
         Calls selected function
         """
         if self.selected_function.get() in self.function_names:
             self.function_dict[self.selected_function.get()]()
 
-    # 34401A function definitions
+    # 34401A function definitions. All call their respective 34401A functions.
     def dcvolts(self):
-        command="MEAS:VOLT:DC? 10, 0.001"
-        value = visacommands.query(CONNECTED_INSTRUMENT, command)
-        print(value)
+        command = f"MEAS:VOLT:DC? {self.range}, {self.resolution}"
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
 
     def acvolts(self):
-        command = "MEAS:VOLT:AC? 10, 0.001"
-        value = visacommands.query(CONNECTED_INSTRUMENT, command)
-        print(value)
+        command = f"MEAS:VOLT:AC? {self.range}, {self.resolution}"
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
+
+    def dccurr(self):
+        command = f"MEAS:CURR:DC? {self.range}, {self.resolution}"
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
+
+    def accurr(self):
+        command = f"MEAS:CURR:AC? {self.range}, {self.resolution}"
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
+
+    def continuity(self):
+        command = "MEAS:CONT?"
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
 
     def twowire(self):
-        pass
+        command = f"MEAS:RES? {self.range}, {self.resolution}"
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
 
     def fourwire(self):
-        pass
+        command = f"MEAS:FRES? {self.range}, {self.resolution}"
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
 
     def freq(self):
-        pass
+        command = f"MEAS:FREQ? {self.range}, {self.resolution}"
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
 
     def period(self):
-        pass
-
-    def cont(self):
-        command = "MEAS:CONT?"
-        value = visacommands.query(CONNECTED_INSTRUMENT, command)
-        print(value)
+        command = f"MEAS:PER? {self.range}, {self.resolution}"
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
 
     def diode(self):
         command = "MEAS:DIOD?"
-        value = visacommands.query(CONNECTED_INSTRUMENT, command)
-        print(value)
+        value = visacommands.query(self.connect_instrument, command)
+        self.display_value.set(value)
 
 
 # Runs the main root display
