@@ -37,29 +37,32 @@ class PyCal:
         self.menu.add_cascade(label="Help", menu=self.help_submenu)
         self.help_submenu.add_command(label="About", command=self.get_version_number)
 
+        # Select GPIB port
+        self.available_ports = list(range(4))
+        self.gpib_ports = StringVar(master)
+        self.gpib_ports.set("GPIB Port")
+        self.gpib_ports_menu = OptionMenu(master, self.gpib_ports, *self.available_ports,
+                                          command=self.selected_port)
+        self.gpib_ports_menu.config(width=11)
+        self.gpib_ports_menu.grid(column=1, row=0, padx=5, pady=5, sticky=W)
+
+        # Select GPIB address
+        self.available_addresses = list(range(30))
+        self.gpib_addresses = StringVar(master)
+        self.gpib_addresses.set("GPIB Address")
+        self.gpib_address_menu = OptionMenu(master, self.gpib_addresses, *self.available_addresses,
+                                            command=self.selected_address)
+        self.gpib_address_menu.config(width=11)
+        self.gpib_address_menu.grid(column=2, row=0, padx=5, pady=5, sticky=W)
+
         # Select Instrument
         self.available_instruments = visacommands.AVAILABLE_INSTRUMENTS
         self.instruments = StringVar(master)
         self.instruments.set("Select Instrument")
         self.instruments = OptionMenu(master, self.instruments, *self.available_instruments,
                                       command=self.selected_instrument)
+        self.instruments.config(width=15)
         self.instruments.grid(column=3, row=0, padx=5, pady=5, sticky=W)
-
-        # Select GPIB port
-        self.available_ports = list(range(4))
-        self.GPIB_ports = StringVar(master)
-        self.GPIB_ports.set("GPIB Port")
-        self.gpib_ports = OptionMenu(master, self.GPIB_ports, *self.available_ports,
-                                     command=self.selected_port)
-        self.gpib_ports.grid(column=1, row=0, padx=5, pady=5, sticky=W)
-
-        # Select GPIB address
-        self.available_addresses = list(range(30))
-        self.GPIB_addresses = StringVar(master)
-        self.GPIB_addresses.set("GPIB Address")
-        self.gpib_address = OptionMenu(master, self.GPIB_addresses, *self.available_addresses,
-                                       command=self.selected_address)
-        self.gpib_address.grid(column=2, row=0, padx=5, pady=5, sticky=W)
 
         # Lists resources
         self.list_resources_button = Button(master, text="List Resources", command=self.list_resources)
@@ -188,10 +191,9 @@ class Unit34401A(Toplevel):
         self.resolution = "MAX"
 
         # Code for screen display
-        display = Label(master, textvariable=self.display_value, font=("Arial", 24), compound=RIGHT,
+        display = Label(master, textvariable=self.display_value, font=("Arial", 24),
                         relief="ridge", anchor=E, height=2)
-        display.grid(row=3, column=1, columnspan=3,
-                     ipadx=5, ipady=3, sticky="EW")
+        display.grid(row=2, column=1, columnspan=3, sticky="EW")
 
     # Opens up selected function pane
     def selector_34401A_function(self):
@@ -260,7 +262,44 @@ class Unit5520A(Toplevel):
         master.title(self.this_instrument)
 
         # Variable to ensure this window is always connected to this instrument
-        self.connect_instrument = CONNECTED_INSTRUMENT
+        self.connected_instrument = CONNECTED_INSTRUMENT
+
+        # Operate Button
+        self.operate_button = Button(master, text="Operate",
+                                     command=lambda: visacommands.query(self.connected_instrument, "OPER\f"))
+        self.operate_button.grid(row=1, column=4)
+
+        # Standby Button
+        self.standby_button = Button(master, text="Standby",
+                                     command=lambda: visacommands.query(self.connected_instrument, "STBY\n"))
+        self.standby_button.grid(row=2, column=4)
+
+        # Value boxes
+        self.value_box1 = Entry(master, justify=RIGHT)
+        self.value_box1.config(width=15)
+        self.value_box1.grid(row=1, column=0, columnspan=1, padx=5, pady=5, sticky=W)
+        self.value_title = Label(master, text="Value")
+        self.value_title.grid(row=0, column=0)
+
+        # Prefix dropdown boxes
+        self.prefix_box1 = StringVar(master)
+        self.prefix_box1.set(" ")
+        self.prefix_box1 = OptionMenu(master, self.prefix_box1, *visacommands.PREFIX_LIST,
+                                      command=None)
+        self.prefix_box1.config(width=1)
+        self.prefix_box1.grid(row=1, column=1, padx=5, pady=5, sticky=W)
+        self.prefix_title = Label(master, text="Prefix")
+        self.prefix_title.grid(row=0, column=1)
+
+        # Unit dropdown boxes
+        self.unit_box1 = StringVar(master)
+        self.unit_box1.set(" ")
+        self.unit_box1 = OptionMenu(master, self.unit_box1, *visacommands.UNITS_LIST,
+                                      command=None)
+        self.unit_box1.config(width=2)
+        self.unit_box1.grid(row=1, column=2,  padx=5, pady=5, sticky=W)
+        self.unit_title = Label(master, text="Unit")
+        self.unit_title.grid(row=0, column=2)
 
 
 

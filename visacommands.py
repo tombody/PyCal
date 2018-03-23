@@ -3,13 +3,15 @@ import visa
 rm = visa.ResourceManager()
 
 #Global variables
-AVAILABLE_INSTRUMENTS = ["3478A", "34401A", "5520A"]
+AVAILABLE_INSTRUMENTS = ["34401A", "5520A", "3478A"]
+PREFIX_LIST = ["p", "n", "µ", " ", "m", "k", "M", "G"]
+UNITS_LIST = ["V", "A", "Ω", "Hz", "°C", "F", "dBm", "W", "sec"]
 
 
 def open_instrument(code):
     """
     Opens the selected instrument
-    :param code:
+    :param code: string -- GPIB address
     """
     current_instrument = rm.open_resource(code)
 
@@ -39,6 +41,6 @@ def unit_identifiers(units):
 
 def query(unit, command):
     inst = rm.open_resource(unit)
-    output = inst.query(command)
+    output = inst.query(command,)
     return output
 
