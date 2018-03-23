@@ -3,10 +3,10 @@ import tkinter.messagebox
 import visacommands
 
 # Global variables
-VERSION_NUMBER = "PyCal v1.0"
-SELECTED_PORT_FROM_LIST = ""
-SELECTED_ADDRESS_FROM_LIST = ""
-SELECTED_INSTRUMENT_FROM_LIST = ""
+VERSION_NUMBER = "PyCal v1.01"
+SELECTED_PORT = ""
+SELECTED_ADDRESS = ""
+SELECTED_INSTRUMENT = ""
 CONNECTED_INSTRUMENT = ""
 
 
@@ -54,7 +54,7 @@ class PyCal:
         self.gpib_ports.grid(column=1, row=0, padx=5, pady=5, sticky=W)
 
         # Select GPIB address
-        self.available_addresses = list(range(25))
+        self.available_addresses = list(range(30))
         self.GPIB_addresses = StringVar(master)
         self.GPIB_addresses.set("GPIB Address")
         self.gpib_address = OptionMenu(master, self.GPIB_addresses, *self.available_addresses,
@@ -66,23 +66,33 @@ class PyCal:
         self.list_resources_button.grid(column=0, row=0, padx=5, pady=5, sticky=W)
 
         # Connects instrument to instrument
-        self.connect_button = Button(master, text="Connect", command=lambda: [self.connect(), self.create_window()])
+        self.connect_button = Button(master, text="Connect", command=self.address_checker)
         self.connect_button.grid(column=4, row=0, padx=5, pady=5, sticky=W)
+
+    # Checks if instrument is connected at an address
+    def address_checker(self):
+        self.resources = visacommands.list_resources()
+        self.test_address = f"GPIB{SELECTED_PORT}::{SELECTED_ADDRESS}::INSTR"
+        if self.test_address in self.resources:
+            self.connect()
+            self.create_window()
+        else:
+            tkinter.messagebox.showinfo("Error", f"No instrument connected at address GPIB{SELECTED_PORT}::{SELECTED_ADDRESS}.")
 
     def create_window(self):
         """
         Opens a new window that controls the selected instrument by opening its class
         """
-        global SELECTED_INSTRUMENT_FROM_LIST
+        global SELECTED_INSTRUMENT
         self.new_window = Toplevel(self.master)
 
         # Runs the selected class. Insert new instruments here.
-        if SELECTED_INSTRUMENT_FROM_LIST == "3478A":
+        if SELECTED_INSTRUMENT == "3478A":
             self.app = NotAvailable(self.new_window)
-        elif SELECTED_INSTRUMENT_FROM_LIST == "34401A":
+        elif SELECTED_INSTRUMENT == "34401A":
             self.app = Unit34401A(self.new_window)
-        elif SELECTED_INSTRUMENT_FROM_LIST == "5520A":
-            self.app = NotAvailable(self.new_window)
+        elif SELECTED_INSTRUMENT == "5520A":
+            self.app = Unit5520A(self.new_window)
 
     @staticmethod
     def list_resources():
@@ -104,26 +114,26 @@ class PyCal:
 
     @staticmethod
     def selected_address(value):
-        global SELECTED_ADDRESS_FROM_LIST
-        SELECTED_ADDRESS_FROM_LIST = value
+        global SELECTED_ADDRESS
+        SELECTED_ADDRESS = value
         return value
 
     @staticmethod
     def selected_port(value):
-        global SELECTED_PORT_FROM_LIST
-        SELECTED_PORT_FROM_LIST = value
+        global SELECTED_PORT
+        SELECTED_PORT = value
         return value
 
     @staticmethod
     def selected_instrument(value):
-        global SELECTED_INSTRUMENT_FROM_LIST
-        SELECTED_INSTRUMENT_FROM_LIST = value
+        global SELECTED_INSTRUMENT
+        SELECTED_INSTRUMENT = value
         return value
 
     @staticmethod
     def connect():
         global CONNECTED_INSTRUMENT
-        CONNECTED_INSTRUMENT = f"GPIB{SELECTED_PORT_FROM_LIST}::{SELECTED_ADDRESS_FROM_LIST}::INSTR"
+        CONNECTED_INSTRUMENT = f"GPIB{SELECTED_PORT}::{SELECTED_ADDRESS}::INSTR"
         # connected_instrument = "GPIB{0}::{1}::INSTR".format(selected_port_from_list, selected_address_from_list)
         visacommands.open_instrument(CONNECTED_INSTRUMENT)
 
@@ -140,7 +150,8 @@ class NotAvailable(Toplevel):
 class Unit34401A(Toplevel):
     def __init__(self, master):
         self.master = master
-        master.title(SELECTED_INSTRUMENT_FROM_LIST)
+        self.this_instrument = SELECTED_INSTRUMENT
+        master.title(self.this_instrument)
 
         # Variable to ensure this window is always connected to this instrument
         self.connect_instrument = CONNECTED_INSTRUMENT
@@ -240,6 +251,17 @@ class Unit34401A(Toplevel):
         command = "MEAS:DIOD?"
         value = visacommands.query(self.connect_instrument, command)
         self.display_value.set(value)
+
+
+class Unit5520A(Toplevel):
+    def __init__(self, master):
+        self.master = master
+        self.this_instrument = SELECTED_INSTRUMENT
+        master.title(self.this_instrument)
+
+        # Variable to ensure this window is always connected to this instrument
+        self.connect_instrument = CONNECTED_INSTRUMENT
+
 
 
 # Runs the main root display
