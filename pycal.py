@@ -264,42 +264,67 @@ class Unit5520A(Toplevel):
         # Variable to ensure this window is always connected to this instrument
         self.connected_instrument = CONNECTED_INSTRUMENT
 
+        # Enter Button
+        self.enter_button = Button(master, text="Enter", width=8,
+                                     command=self.set_command)
+        self.enter_button.grid(row=1, column=4, padx=5, pady=5)
+
         # Operate Button
-        self.operate_button = Button(master, text="Operate",
-                                     command=lambda: visacommands.query(self.connected_instrument, "OPER\f"))
-        self.operate_button.grid(row=1, column=4)
+        self.operate_button = Button(master, text="Operate", width=8,
+                                     command=lambda: visacommands.query(self.connected_instrument, "OPER; *OPC?"))
+        self.operate_button.grid(row=2, column=4, padx=5, pady=5,)
 
         # Standby Button
-        self.standby_button = Button(master, text="Standby",
-                                     command=lambda: visacommands.query(self.connected_instrument, "STBY\n"))
-        self.standby_button.grid(row=2, column=4)
+        self.standby_button = Button(master, text="Standby", width=8,
+                                     command=lambda: visacommands.query(self.connected_instrument, "STBY; *OPC?"))
+        self.standby_button.grid(row=3, column=4, padx=5, pady=5,)
 
         # Value boxes
-        self.value_box1 = Entry(master, justify=RIGHT)
-        self.value_box1.config(width=15)
-        self.value_box1.grid(row=1, column=0, columnspan=1, padx=5, pady=5, sticky=W)
         self.value_title = Label(master, text="Value")
         self.value_title.grid(row=0, column=0)
 
+        self.value_box1 = Entry(master, justify=RIGHT, width=15)
+        self.value_box1.grid(row=1, column=0, columnspan=1, padx=5, pady=5, sticky=W)
+
+        self.value_box2 = Entry(master, justify=RIGHT, width=15)
+        self.value_box2.grid(row=2, column=0, columnspan=1, padx=5, pady=5, sticky=W)
+
         # Prefix dropdown boxes
+        self.prefix_title = Label(master, text="Prefix")
+        self.prefix_title.grid(row=0, column=1)
+
         self.prefix_box1 = StringVar(master)
         self.prefix_box1.set(" ")
         self.prefix_box1 = OptionMenu(master, self.prefix_box1, *visacommands.PREFIX_LIST,
                                       command=None)
-        self.prefix_box1.config(width=1)
         self.prefix_box1.grid(row=1, column=1, padx=5, pady=5, sticky=W)
-        self.prefix_title = Label(master, text="Prefix")
-        self.prefix_title.grid(row=0, column=1)
+
+        self.prefix_box2 = StringVar(master)
+        self.prefix_box2.set(" ")
+        self.prefix_box2 = OptionMenu(master, self.prefix_box2, *visacommands.PREFIX_LIST,
+                                      command=None)
+        self.prefix_box2.grid(row=2, column=1, padx=5, pady=5, sticky=W)
 
         # Unit dropdown boxes
+        self.unit_title = Label(master, text="Unit")
+        self.unit_title.grid(row=0, column=2)
+
         self.unit_box1 = StringVar(master)
         self.unit_box1.set(" ")
         self.unit_box1 = OptionMenu(master, self.unit_box1, *visacommands.UNITS_LIST,
                                       command=None)
         self.unit_box1.config(width=2)
         self.unit_box1.grid(row=1, column=2,  padx=5, pady=5, sticky=W)
-        self.unit_title = Label(master, text="Unit")
-        self.unit_title.grid(row=0, column=2)
+
+        self.unit_box2 = StringVar(master)
+        self.unit_box2.set(" ")
+        self.unit_box2 = OptionMenu(master, self.unit_box2, *visacommands.UNITS_LIST,
+                                    command=None)
+        self.unit_box2.grid(row=2, column=2, padx=5, pady=5, sticky=W)
+
+    def set_command(self):
+        print(1)
+        pass
 
 
 

@@ -41,6 +41,6 @@ def unit_identifiers(units):
 
 def query(unit, command):
     inst = rm.open_resource(unit)
-    output = inst.query(command,)
+    output = inst.query(command)
     return output
 
