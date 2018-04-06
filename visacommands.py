@@ -4,8 +4,9 @@ rm = visa.ResourceManager()
 
 #Global variables
 AVAILABLE_INSTRUMENTS = ["34401A", "5520A", "3478A"]
-PREFIX_LIST = ["p", "n", "µ", " ", "m", "k", "M", "G"]
-UNITS_LIST = ["V", "A", "Ω", "Hz", "°C", "F", "dBm", "W", "sec"]
+PREFIX_LIST = {"p": "p", "n": "n", "µ": "u", "m": "m", " ": " ", "k": "k", "M": "M"}
+UNITS_LIST_1 = {"V": "V", "A": "A", "Ω": "OHM", "Hz": "Hz", "°C": "CEL", "F": "F"}
+UNITS_LIST_2 = {"Hz": "Hz", "A": "A"}
 
 
 def open_instrument(code):
@@ -39,8 +40,8 @@ def unit_identifiers(units):
     return identities
 
 
-def query(unit, command):
-    inst = rm.open_resource(unit)
+def query(instrument, command):
+    inst = rm.open_resource(instrument)
     output = inst.query(command)
     return output
 
