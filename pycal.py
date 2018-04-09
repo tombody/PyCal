@@ -3,11 +3,11 @@ import tkinter.messagebox
 import visacommands
 
 # Global variables
-VERSION_NUMBER = "PyCal v1.01"
-SELECTED_PORT = ""
-SELECTED_ADDRESS = ""
-SELECTED_INSTRUMENT = ""
-CONNECTED_INSTRUMENT = ""
+VERSION_NUMBER = "PyCal v1.0.1"
+selected_port = ""
+selected_address = ""
+selected_instrument = ""
+connected_instrument = ""
 
 
 class PyCal:
@@ -16,6 +16,8 @@ class PyCal:
         self.master = master
         master.title(VERSION_NUMBER)
         master.minsize(width=500, height=40)
+
+
 
         # Creates menu
         self.menu = Menu(master)
@@ -75,26 +77,27 @@ class PyCal:
     # Checks if instrument is connected at an address
     def address_checker(self):
         self.resources = visacommands.list_resources()
-        self.test_address = f"GPIB{SELECTED_PORT}::{SELECTED_ADDRESS}::INSTR"
+        self.test_address = f"GPIB{selected_port}::{selected_address}::INSTR"
         if self.test_address in self.resources:
             self.connect()
             self.create_window()
         else:
-            tkinter.messagebox.showinfo("Error", f"No instrument connected at address GPIB{SELECTED_PORT}::{SELECTED_ADDRESS}.")
+            tkinter.messagebox.showinfo("Error",
+                                        f"No instrument connected at address GPIB{selected_port}::{selected_address}.")
 
     def create_window(self):
         """
         Opens a new window that controls the selected instrument by opening its class
         """
-        global SELECTED_INSTRUMENT
+        global selected_instrument
         self.new_window = Toplevel(self.master)
 
         # Runs the selected class. Insert new instruments here.
-        if SELECTED_INSTRUMENT == "3478A":
+        if selected_instrument == "3478A":
             self.app = NotAvailable(self.new_window)
-        elif SELECTED_INSTRUMENT == "34401A":
+        elif selected_instrument == "34401A":
             self.app = Unit34401A(self.new_window)
-        elif SELECTED_INSTRUMENT == "5520A":
+        elif selected_instrument == "5520A":
             self.app = Unit5520A(self.new_window)
 
     @staticmethod
@@ -117,28 +120,28 @@ class PyCal:
 
     @staticmethod
     def selected_address(value):
-        global SELECTED_ADDRESS
-        SELECTED_ADDRESS = value
+        global selected_address
+        selected_address = value
         return value
 
     @staticmethod
     def selected_port(value):
-        global SELECTED_PORT
-        SELECTED_PORT = value
+        global selected_port
+        selected_port = value
         return value
 
     @staticmethod
     def selected_instrument(value):
-        global SELECTED_INSTRUMENT
-        SELECTED_INSTRUMENT = value
+        global selected_instrument
+        selected_instrument = value
         return value
 
     @staticmethod
     def connect():
-        global CONNECTED_INSTRUMENT
-        CONNECTED_INSTRUMENT = f"GPIB{SELECTED_PORT}::{SELECTED_ADDRESS}::INSTR"
+        global connected_instrument
+        connected_instrument = f"GPIB{selected_port}::{selected_address}::INSTR"
         # connected_instrument = "GPIB{0}::{1}::INSTR".format(selected_port_from_list, selected_address_from_list)
-        visacommands.open_instrument(CONNECTED_INSTRUMENT)
+        visacommands.open_instrument(connected_instrument)
 
 # Instrument Classes
 
@@ -153,11 +156,11 @@ class NotAvailable(Toplevel):
 class Unit34401A(Toplevel):
     def __init__(self, master):
         self.master = master
-        self.this_instrument = SELECTED_INSTRUMENT
+        self.this_instrument = selected_instrument
         master.title(self.this_instrument)
 
         # Variable to ensure this window is always connected to this instrument
-        self.connect_instrument = CONNECTED_INSTRUMENT
+        self.connect_instrument = connected_instrument
 
         # 34401A Functions list
         self.function_names = ["DC-Volts", "AC-Volts", "DC-Current", "AC-Current", "Continuity",
@@ -258,74 +261,139 @@ class Unit34401A(Toplevel):
 class Unit5520A(Toplevel):
     def __init__(self, master):
         self.master = master
-        self.this_instrument = SELECTED_INSTRUMENT
+        self.this_instrument = selected_instrument
         master.title(self.this_instrument)
 
+        # Instrument Variables
+        self.prefix_first_value = ""
+        self.prefix_second_value = ""
+        self.unit_first_value = ""
+        self.unit_second_value = ""
+
         # Variable to ensure this window is always connected to this instrument
-        self.connected_instrument = CONNECTED_INSTRUMENT
+        self.connected_instrument = connected_instrument
 
         # Enter Button
         self.enter_button = Button(master, text="Enter", width=8,
                                      command=self.set_command)
         self.enter_button.grid(row=1, column=4, padx=5, pady=5)
 
+        # Trying to bind enter to run a function. NOT WORKING
+        self.enter_button.bind("<Return>", self.set_command)
+
+
+
         # Operate Button
         self.operate_button = Button(master, text="Operate", width=8,
-                                     command=lambda: visacommands.query(self.connected_instrument, "OPER; *OPC?"))
-        self.operate_button.grid(row=2, column=4, padx=5, pady=5,)
+                                     command=lambda: visacommands.query
+                                     (self.connected_instrument, "*CLS; OPER; *OPC?"))
+        self.operate_button.grid(row=1, column=5, padx=5, pady=5,)
 
         # Standby Button
         self.standby_button = Button(master, text="Standby", width=8,
-                                     command=lambda: visacommands.query(self.connected_instrument, "STBY; *OPC?"))
-        self.standby_button.grid(row=3, column=4, padx=5, pady=5,)
+                                     command=lambda: visacommands.query
+                                     (self.connected_instrument, "*CLS; STBY; *OPC?"))
+        self.standby_button.grid(row=2, column=5, padx=5, pady=5,)
+
+        # Reset Button
+        self.reset_button = Button(master, text="Reset", width=8,
+                                   command=lambda: visacommands.query
+                                   (self.connected_instrument, "*RST; *OPC?"))
+        self.reset_button.grid(row=3, column=5, padx=5, pady=5)
 
         # Value boxes
         self.value_title = Label(master, text="Value")
         self.value_title.grid(row=0, column=0)
 
-        self.value_box1 = Entry(master, justify=RIGHT, width=15)
-        self.value_box1.grid(row=1, column=0, columnspan=1, padx=5, pady=5, sticky=W)
+        self.input_value_box1 = Entry(master, justify=RIGHT, width=15)
+        self.input_value_box1.grid(row=1, column=0, columnspan=1, padx=5, pady=5, sticky=W)
 
-        self.value_box2 = Entry(master, justify=RIGHT, width=15)
-        self.value_box2.grid(row=2, column=0, columnspan=1, padx=5, pady=5, sticky=W)
+        self.input_value_box2 = Entry(master, justify=RIGHT, width=15)
+        self.input_value_box2.grid(row=2, column=0, columnspan=1, padx=5, pady=5, sticky=W)
 
         # Prefix dropdown boxes
         self.prefix_title = Label(master, text="Prefix")
         self.prefix_title.grid(row=0, column=1)
 
-        self.prefix_box1 = StringVar(master)
-        self.prefix_box1.set(" ")
-        self.prefix_box1 = OptionMenu(master, self.prefix_box1, *visacommands.PREFIX_LIST,
-                                      command=None)
+        self.prefix_1 = StringVar(master)
+        self.prefix_1.set(" ")
+        self.prefix_box1 = OptionMenu(master, self.prefix_1, *visacommands.PREFIX_LIST,
+                                      command=self.prefix_first)
+        self.prefix_box1.config(width=2)
         self.prefix_box1.grid(row=1, column=1, padx=5, pady=5, sticky=W)
 
-        self.prefix_box2 = StringVar(master)
-        self.prefix_box2.set(" ")
-        self.prefix_box2 = OptionMenu(master, self.prefix_box2, *visacommands.PREFIX_LIST,
-                                      command=None)
+        self.prefix_2 = StringVar(master)
+        self.prefix_2.set(" ")
+        self.prefix_box2 = OptionMenu(master, self.prefix_2, *visacommands.PREFIX_LIST,
+                                      command=self.prefix_second)
+        self.prefix_box2.config(width=2)
         self.prefix_box2.grid(row=2, column=1, padx=5, pady=5, sticky=W)
 
         # Unit dropdown boxes
         self.unit_title = Label(master, text="Unit")
         self.unit_title.grid(row=0, column=2)
 
-        self.unit_box1 = StringVar(master)
-        self.unit_box1.set(" ")
-        self.unit_box1 = OptionMenu(master, self.unit_box1, *visacommands.UNITS_LIST,
-                                      command=None)
-        self.unit_box1.config(width=2)
+        self.unit_1 = StringVar(master)
+        self.unit_1.set(" ")
+        self.unit_box1 = OptionMenu(master, self.unit_1, *visacommands.UNITS_LIST_1.keys(),
+                                    command=self.unit_first)
+        self.unit_box1.config(width=3)
         self.unit_box1.grid(row=1, column=2,  padx=5, pady=5, sticky=W)
 
-        self.unit_box2 = StringVar(master)
-        self.unit_box2.set(" ")
-        self.unit_box2 = OptionMenu(master, self.unit_box2, *visacommands.UNITS_LIST,
-                                    command=None)
+        self.unit_2 = StringVar(master)
+        self.unit_2.set(" ")
+        self.unit_box2 = OptionMenu(master, self.unit_2, *visacommands.UNITS_LIST_2.keys(),
+                                    command=self.unit_second)
+        self.unit_box2.config(width=3)
         self.unit_box2.grid(row=2, column=2, padx=5, pady=5, sticky=W)
 
     def set_command(self):
-        print(1)
-        pass
+        """
+        Sets the calibrator values
+        """
+        input_1 = self.input_value_box1.get()
+        input_2 = self.input_value_box2.get()
 
+        prefix_1 = self.prefix_first_value
+        prefix_2 = self.prefix_second_value
+
+        unit_1 = self.unit_first_value
+        unit_2 = self.unit_second_value
+
+        end_state = "*OPC?"
+
+        command = f"OUT {input_1}{prefix_1}{unit_1}"
+        command_2 = f"{input_2}{prefix_2}{unit_2}"
+
+        # If first value is filled but not the seocond
+        if input_1 is not "" and input_2 is "":
+            command = f"{command}; {end_state};"
+            visacommands.query(self.connected_instrument, command)
+            print(command)
+
+        # If both values are filled in
+        if input_1 is not "" and input_2 is not "":
+            command = f"{command},{command_2}; {end_state};"
+            visacommands.query(self.connected_instrument, command)
+            print(command)
+
+
+    # Input and dropdown menu functions
+    def prefix_first(self, value):
+        self.prefix_first_value = visacommands.PREFIX_LIST[value]
+        return value
+
+    def prefix_second(self, value):
+        self.prefix_second_value = visacommands.PREFIX_LIST[value]
+        return value
+
+    def unit_first(self, value):
+        self.unit_first_value = visacommands.UNITS_LIST_1[value]
+        return value
+
+    def unit_second(self, value):
+        self.unit_second_value = visacommands.UNITS_LIST_2[value]
+        return value
 
 
 # Runs the main root display
