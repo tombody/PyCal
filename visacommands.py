@@ -2,8 +2,8 @@ import visa
 
 rm = visa.ResourceManager()
 
-#Global variables
-AVAILABLE_INSTRUMENTS = ["34401A", "5520A", "3478A"]
+#Global constants
+AVAILABLE_INSTRUMENTS = ["34401A", "5520A",]
 PREFIX_LIST = {"p": "p", "n": "n", "µ": "u", "m": "m", " ": " ", "k": "k", "M": "M"}
 UNITS_LIST_1 = {"V": "V", "A": "A", "Ω": "OHM", "Hz": "Hz", "°C": "CEL", "F": "F"}
 UNITS_LIST_2 = {"Hz": "Hz", "A": "A"}
@@ -41,7 +41,30 @@ def unit_identifiers(units):
 
 
 def query(instrument, command):
+    '''
+    Queries the instrument
+    :param instrument: Current connected instrument
+    :param command: GPIB command to be run
+    :return: the instruments queried output
+    '''
     inst = rm.open_resource(instrument)
     output = inst.query(command)
     return output
+
+
+def write(instrument, command):
+    '''
+    Writes only to the instrument
+    :param instrument: Current connected instrument
+    :param command: GPIB command to be run
+    '''
+    inst = rm.open_resource(instrument)
+    inst.write(command)
+
+
+def read(instrument, command):
+    inst = rm.open_resource(instrument)
+    output = inst.read(command)
+    return output
+
 

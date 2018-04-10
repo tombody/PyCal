@@ -3,7 +3,7 @@ import tkinter.messagebox
 import visacommands
 
 # Global variables
-VERSION_NUMBER = "PyCal v1.0.1"
+VERSION_NUMBER = "PyCal v1.0.3"
 selected_port = ""
 selected_address = ""
 selected_instrument = ""
@@ -269,6 +269,7 @@ class Unit5520A(Toplevel):
         self.prefix_second_value = ""
         self.unit_first_value = ""
         self.unit_second_value = ""
+        self.input_value_tracker = ""
 
         # Variable to ensure this window is always connected to this instrument
         self.connected_instrument = connected_instrument
@@ -278,76 +279,92 @@ class Unit5520A(Toplevel):
                                      command=self.set_command)
         self.enter_button.grid(row=1, column=4, padx=5, pady=5)
 
-        # Trying to bind enter to run a function. NOT WORKING
-        self.enter_button.bind("<Return>", self.set_command)
-
-
+        # Binds pressing enter to the set_command function
+        master.bind("<Return>", self.set_command)
 
         # Operate Button
         self.operate_button = Button(master, text="Operate", width=8,
-                                     command=lambda: visacommands.query
-                                     (self.connected_instrument, "*CLS; OPER; *OPC?"))
-        self.operate_button.grid(row=1, column=5, padx=5, pady=5,)
+                                     command=lambda: visacommands.write
+                                     (self.connected_instrument, "*CLS; OPER;"))
+        self.operate_button.grid(row=2, column=4, padx=5, pady=5,)
 
         # Standby Button
         self.standby_button = Button(master, text="Standby", width=8,
-                                     command=lambda: visacommands.query
-                                     (self.connected_instrument, "*CLS; STBY; *OPC?"))
-        self.standby_button.grid(row=2, column=5, padx=5, pady=5,)
+                                     command=lambda: visacommands.write
+                                     (self.connected_instrument, "*CLS; STBY;"))
+        self.standby_button.grid(row=3, column=4, padx=5, pady=5,)
 
         # Reset Button
-        self.reset_button = Button(master, text="Reset", width=8,
-                                   command=lambda: visacommands.query
-                                   (self.connected_instrument, "*RST; *OPC?"))
-        self.reset_button.grid(row=3, column=5, padx=5, pady=5)
+        self.reset_button = Button(master, text="Reset", width=8, command=self.reset)
+        self.reset_button.grid(row=4, column=4, padx=5, pady=5)
 
         # Value boxes
         self.value_title = Label(master, text="Value")
-        self.value_title.grid(row=0, column=0)
+        self.value_title.grid(row=0, column=1)
 
-        self.input_value_box1 = Entry(master, justify=RIGHT, width=15)
-        self.input_value_box1.grid(row=1, column=0, columnspan=1, padx=5, pady=5, sticky=W)
+        self.input_value_1 = DoubleVar()
+        self.input_value_1.set(0)
+        self.input_value_box1 = Entry(master, text=self.input_value_1, justify=RIGHT, width=15)
+        self.input_value_box1.grid(row=1, column=1, columnspan=1, padx=5, pady=5, sticky=W)
 
-        self.input_value_box2 = Entry(master, justify=RIGHT, width=15)
-        self.input_value_box2.grid(row=2, column=0, columnspan=1, padx=5, pady=5, sticky=W)
+        self.input_value_2 = DoubleVar()
+        self.input_value_2.set(0)
+        self.input_value_box2 = Entry(master, text=self.input_value_2, justify=RIGHT, width=15)
+        self.input_value_box2.grid(row=2, column=1, columnspan=1, padx=5, pady=5, sticky=W)
 
         # Prefix dropdown boxes
         self.prefix_title = Label(master, text="Prefix")
-        self.prefix_title.grid(row=0, column=1)
+        self.prefix_title.grid(row=0, column=2)
 
         self.prefix_1 = StringVar(master)
         self.prefix_1.set(" ")
         self.prefix_box1 = OptionMenu(master, self.prefix_1, *visacommands.PREFIX_LIST,
                                       command=self.prefix_first)
         self.prefix_box1.config(width=2)
-        self.prefix_box1.grid(row=1, column=1, padx=5, pady=5, sticky=W)
+        self.prefix_box1.grid(row=1, column=2, padx=5, pady=5, sticky=W)
 
         self.prefix_2 = StringVar(master)
         self.prefix_2.set(" ")
         self.prefix_box2 = OptionMenu(master, self.prefix_2, *visacommands.PREFIX_LIST,
                                       command=self.prefix_second)
         self.prefix_box2.config(width=2)
-        self.prefix_box2.grid(row=2, column=1, padx=5, pady=5, sticky=W)
+        self.prefix_box2.grid(row=2, column=2, padx=5, pady=5, sticky=W)
 
         # Unit dropdown boxes
         self.unit_title = Label(master, text="Unit")
-        self.unit_title.grid(row=0, column=2)
+        self.unit_title.grid(row=0, column=3)
 
         self.unit_1 = StringVar(master)
         self.unit_1.set(" ")
         self.unit_box1 = OptionMenu(master, self.unit_1, *visacommands.UNITS_LIST_1.keys(),
                                     command=self.unit_first)
         self.unit_box1.config(width=3)
-        self.unit_box1.grid(row=1, column=2,  padx=5, pady=5, sticky=W)
+        self.unit_box1.grid(row=1, column=3,  padx=5, pady=5, sticky=W)
 
         self.unit_2 = StringVar(master)
         self.unit_2.set(" ")
         self.unit_box2 = OptionMenu(master, self.unit_2, *visacommands.UNITS_LIST_2.keys(),
                                     command=self.unit_second)
         self.unit_box2.config(width=3)
-        self.unit_box2.grid(row=2, column=2, padx=5, pady=5, sticky=W)
+        self.unit_box2.grid(row=2, column=3, padx=5, pady=5, sticky=W)
 
-    def set_command(self):
+        # Multiplier/Divider buttons
+        self.multiplier_button = Button(master, text="x10", width=4,
+                                        command=self.multiplier)
+        self.multiplier_button.grid(row=1, column=0, padx=5, pady=5, sticky=W)
+
+        # Divider button
+        self.divider_button = Button(master, text="÷10", width=4,
+                                     command=self.divider)
+        self.divider_button.grid(row=2, column=0, padx=5, pady=5, sticky=W)
+
+        # Lcomp Button
+        self.lcomp_button = Button(master, text="L-Comp", width=8,
+                                   command= lambda: visacommands.write(self.connected_instrument, "LCOMP"))
+        self.lcomp_button.grid(row=1, column=5, padx=5, pady=5)
+
+
+    def set_command(self, event=None):
         """
         Sets the calibrator values
         """
@@ -360,25 +377,56 @@ class Unit5520A(Toplevel):
         unit_1 = self.unit_first_value
         unit_2 = self.unit_second_value
 
-        end_state = "*OPC?"
-
         command = f"OUT {input_1}{prefix_1}{unit_1}"
         command_2 = f"{input_2}{prefix_2}{unit_2}"
 
-        # If first value is filled but not the seocond
-        if input_1 is not "" and input_2 is "":
-            command = f"{command}; {end_state};"
-            visacommands.query(self.connected_instrument, command)
-            print(command)
+        # Might be able to simplify and remove if/elif
+        # If first value is filled out and the second is empty or hasn't changed
+        if input_1 is not 0 and (input_2 is 0 or input_2 == self.input_value_tracker):
+            command = f"{command};"
+            visacommands.write(self.connected_instrument, command)
 
-        # If both values are filled in
-        if input_1 is not "" and input_2 is not "":
-            command = f"{command},{command_2}; {end_state};"
-            visacommands.query(self.connected_instrument, command)
-            print(command)
+        # If both values are filled in and value_2 hasn't changed
+        elif input_1 is not 0 and input_2 is not 0:
+            command = f"{command},{command_2};"
+            visacommands.write(self.connected_instrument, command)
 
+        # Variable to track if input_value_2 has changed
+        self.input_value_tracker = self.input_value_box2.get()
 
-    # Input and dropdown menu functions
+    def reset(self):
+        """
+        Resets the calibrator and sets all values to defaults
+        """
+        # Resets calibrator
+        visacommands.write(self.connected_instrument, "*RST")
+
+        # Resets inputs, prefixes and units
+        self.input_value_1.set(0)
+        self.input_value_2.set(0)
+        self.prefix_1.set(" ")
+        self.prefix_2.set(" ")
+        self.unit_1.set(" ")
+        self.unit_2.set(" ")
+
+    def multiplier(self):
+        """
+        Used for the multiplier button. Multiplies the input value by 10.
+        """
+        value = self.input_value_1.get()
+        value *= 10
+        self.input_value_1.set(value)
+
+    def divider(self):
+        """
+        Used for the divider button. Dividers the input value by 10
+        """
+        value = self.input_value_1.get()
+        value /= 10
+        self.input_value_1.set(value)
+
+    # Input and dro down menu functions
+
     def prefix_first(self, value):
         self.prefix_first_value = visacommands.PREFIX_LIST[value]
         return value
