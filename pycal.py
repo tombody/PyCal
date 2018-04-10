@@ -3,7 +3,7 @@ import tkinter.messagebox
 import visacommands
 
 # Global variables
-VERSION_NUMBER = "PyCal v1.0.2"
+VERSION_NUMBER = "PyCal v1.0.3"
 selected_port = ""
 selected_address = ""
 selected_instrument = ""
@@ -284,14 +284,14 @@ class Unit5520A(Toplevel):
 
         # Operate Button
         self.operate_button = Button(master, text="Operate", width=8,
-                                     command=lambda: visacommands.query
-                                     (self.connected_instrument, "*CLS; OPER; *OPC?"))
+                                     command=lambda: visacommands.write
+                                     (self.connected_instrument, "*CLS; OPER;"))
         self.operate_button.grid(row=2, column=4, padx=5, pady=5,)
 
         # Standby Button
         self.standby_button = Button(master, text="Standby", width=8,
-                                     command=lambda: visacommands.query
-                                     (self.connected_instrument, "*CLS; STBY; *OPC?"))
+                                     command=lambda: visacommands.write
+                                     (self.connected_instrument, "*CLS; STBY;"))
         self.standby_button.grid(row=3, column=4, padx=5, pady=5,)
 
         # Reset Button
@@ -360,7 +360,7 @@ class Unit5520A(Toplevel):
 
         # Lcomp Button
         self.lcomp_button = Button(master, text="L-Comp", width=8,
-                                   command= lambda: visacommands.query(self.connected_instrument, "LCOMP"))
+                                   command= lambda: visacommands.write(self.connected_instrument, "LCOMP"))
         self.lcomp_button.grid(row=1, column=5, padx=5, pady=5)
 
 
@@ -377,28 +377,19 @@ class Unit5520A(Toplevel):
         unit_1 = self.unit_first_value
         unit_2 = self.unit_second_value
 
-        end_state = "*OPC?"
-
         command = f"OUT {input_1}{prefix_1}{unit_1}"
         command_2 = f"{input_2}{prefix_2}{unit_2}"
 
+        # Might be able to simplify and remove if/elif
         # If first value is filled out and the second is empty or hasn't changed
-        # if input_1 is not 0 and input_2 is 0:
         if input_1 is not 0 and (input_2 is 0 or input_2 == self.input_value_tracker):
-            # print("first statement run")
-            # print(f"old input_2: {self.input_value_tracker}")
-            # print(f"new input_2: {input_2}")
-            command = f"{command}; {end_state};"
-            visacommands.query(self.connected_instrument, command)
+            command = f"{command};"
+            visacommands.write(self.connected_instrument, command)
 
         # If both values are filled in and value_2 hasn't changed
-        # elif input_1 is not "" and input_2 is not "":
         elif input_1 is not 0 and input_2 is not 0:
-            # print("Second statement run")
-            # print(f"old input_2: {self.input_value_tracker}")
-            # print(f"new input_2: {input_2}")
-            command = f"{command},{command_2}; {end_state};"
-            visacommands.query(self.connected_instrument, command)
+            command = f"{command},{command_2};"
+            visacommands.write(self.connected_instrument, command)
 
         # Variable to track if input_value_2 has changed
         self.input_value_tracker = self.input_value_box2.get()
@@ -408,7 +399,7 @@ class Unit5520A(Toplevel):
         Resets the calibrator and sets all values to defaults
         """
         # Resets calibrator
-        visacommands.query(self.connected_instrument, "*RST; *OPC?")
+        visacommands.write(self.connected_instrument, "*RST")
 
         # Resets inputs, prefixes and units
         self.input_value_1.set(0)
