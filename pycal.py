@@ -3,7 +3,7 @@ import tkinter.messagebox
 import visacommands
 
 # Global variables
-VERSION_NUMBER = "PyCal v1.0.3"
+VERSION_NUMBER = "PyCal v1.0.4"
 selected_port = ""
 selected_address = ""
 selected_instrument = ""
