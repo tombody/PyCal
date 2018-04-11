@@ -3,7 +3,7 @@ import tkinter.messagebox
 import visacommands
 
 # Global variables
-VERSION_NUMBER = "PyCal v1.0.3"
+VERSION_NUMBER = "PyCal v1.0.4"
 selected_port = ""
 selected_address = ""
 selected_instrument = ""
@@ -274,13 +274,15 @@ class Unit5520A(Toplevel):
         # Variable to ensure this window is always connected to this instrument
         self.connected_instrument = connected_instrument
 
+        # Button binds
+        master.bind("<Return>", self.set_command)   # Enter button
+        master.bind("<Prior>", self.multiplier)     # Page up
+        master.bind("<Next>", self.divider)         # Page down
+
         # Enter Button
         self.enter_button = Button(master, text="Enter", width=8,
                                      command=self.set_command)
         self.enter_button.grid(row=1, column=4, padx=5, pady=5)
-
-        # Binds pressing enter to the set_command function
-        master.bind("<Return>", self.set_command)
 
         # Operate Button
         self.operate_button = Button(master, text="Operate", width=8,
@@ -363,7 +365,6 @@ class Unit5520A(Toplevel):
                                    command= lambda: visacommands.write(self.connected_instrument, "LCOMP"))
         self.lcomp_button.grid(row=1, column=5, padx=5, pady=5)
 
-
     def set_command(self, event=None):
         """
         Sets the calibrator values
@@ -409,21 +410,25 @@ class Unit5520A(Toplevel):
         self.unit_1.set(" ")
         self.unit_2.set(" ")
 
-    def multiplier(self):
+    def multiplier(self, event=None):
         """
         Used for the multiplier button. Multiplies the input value by 10.
+        Disabled for current.
         """
-        value = self.input_value_1.get()
-        value *= 10
-        self.input_value_1.set(value)
+        if not self.unit_first_value == "A":
+            value = self.input_value_1.get()
+            value *= 10
+            self.input_value_1.set(value)
 
-    def divider(self):
+    def divider(self, event=None):
         """
-        Used for the divider button. Dividers the input value by 10
+        Used for the divider button. Dividers the input value by 10.
+        Disabled for current.
         """
-        value = self.input_value_1.get()
-        value /= 10
-        self.input_value_1.set(value)
+        if not self.unit_first_value == "A":
+            value = self.input_value_1.get()
+            value /= 10
+            self.input_value_1.set(value)
 
     # Input and dro down menu functions
 
