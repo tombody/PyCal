@@ -3,7 +3,7 @@ import tkinter.messagebox
 import visacommands
 
 # Global variables
-VERSION_NUMBER = "PyCal v1.0.5"
+VERSION_NUMBER = "PyCal v1.0.6"
 selected_port = ""
 selected_address = ""
 selected_instrument = ""
@@ -265,11 +265,11 @@ class Unit5520A(Toplevel):
         master.title(self.this_instrument)
 
         # Instrument Variables
-        self.prefix_first_value = ""
-        self.prefix_second_value = ""
-        self.unit_first_value = ""
-        self.unit_second_value = ""
-        self.input_value_tracker = 0
+        self.prefix_first_value = " "
+        self.prefix_second_value = " "
+        self.unit_first_value = " "
+        self.unit_second_value = " "
+        self.input_value_tracker = "0"
 
         # Variable to ensure this window is always connected to this instrument
         self.connected_instrument = connected_instrument
@@ -365,6 +365,9 @@ class Unit5520A(Toplevel):
                                    command= lambda: visacommands.write(self.connected_instrument, "LCOMP"))
         self.lcomp_button.grid(row=1, column=5, padx=5, pady=5)
 
+        # Resets instrument on startup
+        self.reset()
+
     def set_command(self, event=None):
         """
         Sets the calibrator values
@@ -382,12 +385,12 @@ class Unit5520A(Toplevel):
         command_2 = f"{input_2}{prefix_2}{unit_2}"
 
         # If first value is filled out and the second is empty or hasn't changed
-        if input_1 is not 0 and (input_2 is 0 or input_2 == self.input_value_tracker):
+        if not input_1 == 0 and (input_2 == 0 or input_2 == self.input_value_tracker):
             command = f"{command};"
             visacommands.write(self.connected_instrument, command)
 
         # If both values are filled in and value_2 hasn't changed
-        elif input_1 is not 0 and input_2 is not 0:
+        elif not input_1 == 0 and not input_2 == 0:
             command = f"{command},{command_2};"
             visacommands.write(self.connected_instrument, command)
 
