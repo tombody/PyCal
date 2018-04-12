@@ -3,7 +3,7 @@ import tkinter.messagebox
 import visacommands
 
 # Global variables
-VERSION_NUMBER = "PyCal v1.0.4"
+VERSION_NUMBER = "PyCal v1.0.5"
 selected_port = ""
 selected_address = ""
 selected_instrument = ""
@@ -269,7 +269,7 @@ class Unit5520A(Toplevel):
         self.prefix_second_value = ""
         self.unit_first_value = ""
         self.unit_second_value = ""
-        self.input_value_tracker = ""
+        self.input_value_tracker = 0
 
         # Variable to ensure this window is always connected to this instrument
         self.connected_instrument = connected_instrument
@@ -381,7 +381,6 @@ class Unit5520A(Toplevel):
         command = f"OUT {input_1}{prefix_1}{unit_1}"
         command_2 = f"{input_2}{prefix_2}{unit_2}"
 
-        # Might be able to simplify and remove if/elif
         # If first value is filled out and the second is empty or hasn't changed
         if input_1 is not 0 and (input_2 is 0 or input_2 == self.input_value_tracker):
             command = f"{command};"
