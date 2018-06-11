@@ -1,9 +1,10 @@
 from tkinter import *
 import tkinter.messagebox
 import visacommands
+import ADTS405
 
 # Global variables
-VERSION_NUMBER = "PyCal v1.0.6"
+VERSION_NUMBER = "PyCal v1.0.7"
 selected_port = ""
 selected_address = ""
 selected_instrument = ""
@@ -26,7 +27,12 @@ class PyCal:
         # Creates file menu
         self.file_subMenu = Menu(self.menu, tearoff=False)
         self.menu.add_cascade(label="File", menu=self.file_subMenu)
-        self.file_subMenu.add_command(label="Save")
+
+        # Creates open procedure submenu
+        self.open_procedure_menu = Menu(self.file_subMenu, tearoff=False)
+        self.open_procedure_menu.add_command(label="Druck ADTS405", command=ADTS405)
+        self.file_subMenu.add_cascade(label="Open Procedure", menu=self.open_procedure_menu)
+
         self.file_subMenu.add_separator()
         self.file_subMenu.add_command(label="Exit", command=master.quit)
 
@@ -142,6 +148,10 @@ class PyCal:
         connected_instrument = f"GPIB{selected_port}::{selected_address}::INSTR"
         # connected_instrument = "GPIB{0}::{1}::INSTR".format(selected_port_from_list, selected_address_from_list)
         visacommands.open_instrument(connected_instrument)
+
+    #
+    def open_procedure(self):
+        print("working")
 
 # Instrument Classes
 

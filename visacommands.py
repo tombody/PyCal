@@ -2,7 +2,7 @@ import visa
 
 rm = visa.ResourceManager()
 
-#Global constants
+# Global constants
 AVAILABLE_INSTRUMENTS = ["34401A", "5520A",]
 PREFIX_LIST = {"p": "p", "n": "n", "µ": "u", "m": "m", " ": " ", "k": "k", "M": "M"}
 UNITS_LIST_1 = {"V": "V", "A": "A", "Ω": "OHM", "Hz": "Hz", "°C": "CEL", "F": "F"}
