@@ -463,6 +463,23 @@ class ProcedureADTS405(Toplevel):
         self.master = master
         master.title("ADTS405")
 
+        # Select GPIB port
+        self.available_ports = list(range(4))
+        self.gpib_ports = StringVar(master)
+        self.gpib_ports.set("GPIB Port")
+        self.gpib_ports_menu = OptionMenu(master, self.gpib_ports, *self.available_ports)
+        self.gpib_ports_menu.config(width=11)
+        self.gpib_ports_menu.grid(column=1, row=1, padx=5, pady=5, sticky=W)
+
+        # Select GPIB address
+        self.available_addresses = list(range(30))
+        self.gpib_addresses = StringVar(master)
+        self.gpib_addresses.set("GPIB Address")
+        self.gpib_address_menu = OptionMenu(master, self.gpib_addresses, *self.available_addresses, command=self.test)
+        self.gpib_address_menu.config(width=11)
+        self.gpib_address_menu.grid(column=2, row=1, padx=5, pady=5, sticky=W)
+
+
 
 
 
