@@ -1,7 +1,7 @@
 from tkinter import *
 import tkinter.messagebox
 import visacommands
-import ADTS405
+from procedures import ADTS405
 
 # Global variables
 VERSION_NUMBER = "PyCal v1.0.7"
@@ -18,8 +18,6 @@ class PyCal:
         master.title(VERSION_NUMBER)
         master.minsize(width=500, height=40)
 
-
-
         # Creates menu
         self.menu = Menu(master)
         master.config(menu=self.menu)
@@ -30,7 +28,7 @@ class PyCal:
 
         # Creates open procedure submenu
         self.open_procedure_menu = Menu(self.file_subMenu, tearoff=False)
-        self.open_procedure_menu.add_command(label="Druck ADTS405", command=ADTS405)
+        self.open_procedure_menu.add_command(label="Druck ADTS405", command=self.open_procedure_ADTS405)
         self.file_subMenu.add_cascade(label="Open Procedure", menu=self.open_procedure_menu)
 
         self.file_subMenu.add_separator()
@@ -96,15 +94,15 @@ class PyCal:
         Opens a new window that controls the selected instrument by opening its class
         """
         global selected_instrument
-        self.new_window = Toplevel(self.master)
+        new_window = Toplevel(self.master)
 
         # Runs the selected class. Insert new instruments here.
         if selected_instrument == "3478A":
-            self.app = NotAvailable(self.new_window)
+            self.app = NotAvailable(new_window)
         elif selected_instrument == "34401A":
-            self.app = Unit34401A(self.new_window)
+            self.app = Unit34401A(new_window)
         elif selected_instrument == "5520A":
-            self.app = Unit5520A(self.new_window)
+            self.app = Unit5520A(new_window)
 
     @staticmethod
     def list_resources():
@@ -149,11 +147,10 @@ class PyCal:
         # connected_instrument = "GPIB{0}::{1}::INSTR".format(selected_port_from_list, selected_address_from_list)
         visacommands.open_instrument(connected_instrument)
 
-    #
-    def open_procedure(self):
-        print("working")
-
-# Instrument Classes
+    # Procedures
+    def open_procedure_ADTS405(self):
+        new_window = Toplevel(self.master)
+        ProcedureADTS405(new_window)
 
 
 class NotAvailable(Toplevel):
@@ -459,6 +456,16 @@ class Unit5520A(Toplevel):
     def unit_second(self, value):
         self.unit_second_value = visacommands.UNITS_LIST_2[value]
         return value
+
+
+class ProcedureADTS405(Toplevel):
+    def __init__(self, master):
+        self.master = master
+        master.title("ADTS405")
+
+
+
+
 
 
 # Runs the main root display
